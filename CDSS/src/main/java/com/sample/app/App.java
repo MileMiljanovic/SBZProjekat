@@ -1,23 +1,21 @@
 package com.sample.app;
 
-import java.sql.Date;
-import java.util.ArrayList;
-import java.util.Calendar;
 
-import com.sample.model.Dijagnoza;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.StringTokenizer;
+
+import com.sample.gui.DoctorPanel;
+
 
 
 public class App {
 
 	public static void main(String[] args) {
-		Dijagnoza d = new Dijagnoza();
-		d.setBolest("amin");
-		d.setDoktor("pera");
-		d.setId(123);
-		d.setKartaPacijenta(532);
-		d.setDatum(new Date(Calendar.getInstance().getTime().getTime()));
-		System.out.println(d.getDatum());
-		
+		DoctorPanel d = new DoctorPanel();
+		d.setSize(500, 300);
+		d.setLocationRelativeTo(null);
+		d.setVisible(true);
 
 	}
 	
@@ -29,6 +27,16 @@ public class App {
 			else s += lista.get(i);
 		}
 		return s;
+	}
+	
+	public static ArrayList<String> toArrayList(String s) {
+		ArrayList<String> l = new ArrayList<String>();
+		StringTokenizer tokenizer = new StringTokenizer(s, ",");
+        
+        while (tokenizer.hasMoreTokens()) {
+            l.add(tokenizer.nextToken());
+        }        
+		return l;
 	}
 
 }
