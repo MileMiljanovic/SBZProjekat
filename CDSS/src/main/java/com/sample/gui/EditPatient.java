@@ -4,17 +4,35 @@ import javax.swing.JFrame;
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+
 import java.awt.Font;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
 import javax.swing.JButton;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.JTextArea;
 
 public class EditPatient extends JFrame {
+	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private JTextField prezimePFieldE;
 	private JTextField imePFieldE;
 	private JTextField brKarteFieldE;
-	public EditPatient() {
+	
+	public EditPatient(String pacijent) {
+		
 		setTitle("Izmena pacijenta");
 		
 		JLabel lblDodajteNovogPacijenta = new JLabel("Izmenite pacijenta:");
@@ -41,8 +59,29 @@ public class EditPatient extends JFrame {
 		brKarteFieldE = new JTextField();
 		brKarteFieldE.setEditable(false);
 		brKarteFieldE.setColumns(10);
+		brKarteFieldE.setText(pacijent);
 		
 		JTextArea alergijeFieldE = new JTextArea();
+		
+		Connection con;
+		try {
+			con = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:Orcl","c##ljemi","ljemi");
+			PreparedStatement statement1;
+			statement1 = con.prepareStatement("select * from PACIJENTI where brkarte = " + pacijent);
+			ResultSet r1 = statement1.executeQuery();
+			while (r1.next()) {
+				brKarteFieldE.setText(pacijent);
+				imePFieldE.setText(r1.getString("ime"));
+				prezimePFieldE.setText(r1.getString("prezime"));
+				alergijeFieldE.setText(r1.getString("alergije"));
+			}
+			con.close();
+		}
+		catch (SQLException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		
 		GroupLayout groupLayout = new GroupLayout(getContentPane());
 		groupLayout.setHorizontalGroup(
 			groupLayout.createParallelGroup(Alignment.LEADING)
@@ -66,15 +105,15 @@ public class EditPatient extends JFrame {
 						.addGroup(groupLayout.createSequentialGroup()
 							.addContainerGap()
 							.addGroup(groupLayout.createParallelGroup(Alignment.TRAILING)
-								.addComponent(OKPacijentE, GroupLayout.PREFERRED_SIZE, 47, GroupLayout.PREFERRED_SIZE)
-								.addComponent(lblAlergijeodvojeneZarezima))
+								.addComponent(lblAlergijeodvojeneZarezima)
+								.addComponent(OKPacijentE, GroupLayout.PREFERRED_SIZE, 57, GroupLayout.PREFERRED_SIZE))
 							.addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
 								.addGroup(groupLayout.createSequentialGroup()
 									.addPreferredGap(ComponentPlacement.RELATED)
 									.addComponent(alergijeFieldE, GroupLayout.PREFERRED_SIZE, 247, GroupLayout.PREFERRED_SIZE))
 								.addGroup(groupLayout.createSequentialGroup()
 									.addGap(88)
-									.addComponent(cancelPacijentE, GroupLayout.PREFERRED_SIZE, 63, GroupLayout.PREFERRED_SIZE))))
+									.addComponent(cancelPacijentE, GroupLayout.PREFERRED_SIZE, 87, GroupLayout.PREFERRED_SIZE))))
 						.addGroup(groupLayout.createSequentialGroup()
 							.addGap(143)
 							.addComponent(lblDodajteNovogPacijenta, GroupLayout.PREFERRED_SIZE, 143, GroupLayout.PREFERRED_SIZE)))
@@ -108,5 +147,34 @@ public class EditPatient extends JFrame {
 					.addGap(23))
 		);
 		getContentPane().setLayout(groupLayout);
+		
+		cancelPacijentE.addActionListener(new ActionListener() {
+		    public void actionPerformed(ActionEvent e) {
+		    	SwingUtilities.getWindowAncestor(cancelPacijentE).dispose();
+		    }
+		});
+		
+		OKPacijentE.addActionListener(new ActionListener() {
+		    public void actionPerformed(ActionEvent e) {
+		    	Connection con;
+				try {
+					con = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:Orcl","c##ljemi","ljemi");
+					PreparedStatement statement1;
+					statement1 = con.prepareStatement("update PACIJENTI set alergije = '" + alergijeFieldE.getText() 
+					+"', ime = '"+ imePFieldE.getText()+ "', prezime = '" + prezimePFieldE.getText() 
+					+ "' where brkarte = " + brKarteFieldE.getText());
+					statement1.executeQuery();
+					JOptionPane.showMessageDialog(getContentPane(), "Pacijent je uspesno izmenjen!");
+					con.close();
+					SwingUtilities.getWindowAncestor(OKPacijentE).dispose();
+				}
+				catch (SQLException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+		    }
+		});
 	}
+	
+	
 }

@@ -4,133 +4,252 @@ import javax.swing.JFrame;
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.JTabbedPane;
-import javax.swing.JInternalFrame;
 import javax.swing.JPanel;
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JOptionPane;
+
 import java.awt.BorderLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.StringTokenizer;
+import java.util.Vector;
+
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.LayoutStyle.ComponentPlacement;
+import javax.swing.ListSelectionModel;
 import javax.swing.JTable;
+import javax.swing.SwingUtilities;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.DefaultListModel;
+import javax.swing.JScrollPane;
+import javax.swing.ListModel;
+import java.awt.List;
 
 public class DoctorPanel extends JFrame {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private JTable table;
 	
-	public DoctorPanel() {
+	public DoctorPanel(String logged) {
 		setTitle("Dijagnosticki panel");
 		getContentPane().setLayout(new BorderLayout(0, 0));
 		
 		JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
 		
+		DefaultListModel<String> model = new DefaultListModel<>();
+		
 		JPanel dijagnoze = new JPanel();
 		tabbedPane.addTab("Dijagnoze", null, dijagnoze, null);
 		
-		JButton logout = new JButton("Logout");
+		JLabel lblNewLabel = new JLabel("Unesite simptome koji se manifestuju:");
 		
-		JList allSimptomi = new JList();
-		
-		JList chosenSimptomi = new JList();
+		JScrollPane scrollPane = new JScrollPane();
 		
 		JButton addSimptom = new JButton(">>");
 		
-		JButton button = new JButton("<<");
+		JButton removeSimptom = new JButton("<<");
 		
-		JLabel lblOdaberiteSimptomeKoji = new JLabel("Odaberite simptome koji se manifestuju:");
+		JScrollPane scrollPane_1 = new JScrollPane();
 		
-		JButton dijagnozaButton = new JButton("Dijagnoza");
+		JButton dijagnozaBtn = new JButton("Dijagnoza");
 		
-		JButton btnPovezaneBolesti = new JButton("Povezane bolesti");
+		JButton povezaneBtn = new JButton("Povezane bolesti");
+		
+		JButton logout = new JButton("Odjava");
+		
+		JLabel lblPacijent = new JLabel("Pacijent:");
+		
+		JComboBox pacijentBox = new JComboBox();
+		
+		JLabel label = new JLabel("Bolesti:");
 		
 		JComboBox bolestiSimpBox = new JComboBox();
 		
 		JButton prikaziSimptomeBtn = new JButton("Prikazi simptome");
-		
-		JLabel lblBolest = new JLabel("Bolest:");
-		
-		JLabel lblPacijent = new JLabel("Pacijent za dijagnozu:");
-		
-		JComboBox pacijentBox = new JComboBox();
 		GroupLayout gl_dijagnoze = new GroupLayout(dijagnoze);
 		gl_dijagnoze.setHorizontalGroup(
 			gl_dijagnoze.createParallelGroup(Alignment.LEADING)
 				.addGroup(gl_dijagnoze.createSequentialGroup()
-					.addGap(20)
+					.addContainerGap()
 					.addGroup(gl_dijagnoze.createParallelGroup(Alignment.LEADING)
 						.addGroup(gl_dijagnoze.createSequentialGroup()
-							.addGroup(gl_dijagnoze.createParallelGroup(Alignment.LEADING)
-								.addComponent(allSimptomi, GroupLayout.PREFERRED_SIZE, 98, GroupLayout.PREFERRED_SIZE)
-								.addComponent(dijagnozaButton))
+							.addComponent(lblNewLabel)
+							.addPreferredGap(ComponentPlacement.RELATED, 196, Short.MAX_VALUE)
+							.addComponent(logout))
+						.addGroup(gl_dijagnoze.createSequentialGroup()
 							.addGroup(gl_dijagnoze.createParallelGroup(Alignment.LEADING)
 								.addGroup(gl_dijagnoze.createSequentialGroup()
+									.addComponent(scrollPane, GroupLayout.PREFERRED_SIZE, 142, GroupLayout.PREFERRED_SIZE)
 									.addPreferredGap(ComponentPlacement.RELATED)
 									.addGroup(gl_dijagnoze.createParallelGroup(Alignment.LEADING)
-										.addComponent(addSimptom)
-										.addComponent(button))
-									.addPreferredGap(ComponentPlacement.RELATED)
-									.addComponent(chosenSimptomi, GroupLayout.PREFERRED_SIZE, 117, GroupLayout.PREFERRED_SIZE)
-									.addPreferredGap(ComponentPlacement.RELATED)
-									.addGroup(gl_dijagnoze.createParallelGroup(Alignment.LEADING)
-										.addGroup(gl_dijagnoze.createParallelGroup(Alignment.TRAILING, false)
-											.addComponent(pacijentBox, Alignment.LEADING, 0, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-											.addComponent(lblPacijent, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-											.addComponent(logout, GroupLayout.PREFERRED_SIZE, 75, GroupLayout.PREFERRED_SIZE))
-										.addGroup(gl_dijagnoze.createSequentialGroup()
-											.addGap(4)
-											.addGroup(gl_dijagnoze.createParallelGroup(Alignment.LEADING)
-												.addComponent(prikaziSimptomeBtn)
-												.addComponent(bolestiSimpBox, GroupLayout.PREFERRED_SIZE, 101, GroupLayout.PREFERRED_SIZE)
-												.addComponent(lblBolest))))
-									.addGap(30))
+										.addComponent(removeSimptom)
+										.addComponent(addSimptom)))
 								.addGroup(gl_dijagnoze.createSequentialGroup()
-									.addGap(15)
-									.addComponent(btnPovezaneBolesti))))
-						.addComponent(lblOdaberiteSimptomeKoji))
-					.addContainerGap(10, Short.MAX_VALUE))
+									.addGap(10)
+									.addComponent(dijagnozaBtn)))
+							.addPreferredGap(ComponentPlacement.RELATED)
+							.addGroup(gl_dijagnoze.createParallelGroup(Alignment.TRAILING)
+								.addComponent(povezaneBtn)
+								.addComponent(scrollPane_1, GroupLayout.PREFERRED_SIZE, 119, GroupLayout.PREFERRED_SIZE))
+							.addPreferredGap(ComponentPlacement.UNRELATED)
+							.addGroup(gl_dijagnoze.createParallelGroup(Alignment.LEADING)
+								.addComponent(prikaziSimptomeBtn, GroupLayout.DEFAULT_SIZE, 111, Short.MAX_VALUE)
+								.addComponent(lblPacijent)
+								.addComponent(pacijentBox, 0, 111, Short.MAX_VALUE)
+								.addComponent(bolestiSimpBox, 0, 111, Short.MAX_VALUE)
+								.addComponent(label, GroupLayout.PREFERRED_SIZE, 54, GroupLayout.PREFERRED_SIZE))))
+					.addContainerGap())
 		);
 		gl_dijagnoze.setVerticalGroup(
 			gl_dijagnoze.createParallelGroup(Alignment.LEADING)
 				.addGroup(gl_dijagnoze.createSequentialGroup()
-					.addGroup(gl_dijagnoze.createParallelGroup(Alignment.LEADING, false)
-						.addGroup(gl_dijagnoze.createSequentialGroup()
-							.addGroup(gl_dijagnoze.createParallelGroup(Alignment.LEADING)
-								.addGroup(gl_dijagnoze.createSequentialGroup()
-									.addGap(61)
-									.addComponent(addSimptom)
-									.addPreferredGap(ComponentPlacement.UNRELATED)
-									.addComponent(button))
-								.addGroup(gl_dijagnoze.createSequentialGroup()
-									.addComponent(lblOdaberiteSimptomeKoji)
-									.addPreferredGap(ComponentPlacement.RELATED)
-									.addGroup(gl_dijagnoze.createParallelGroup(Alignment.BASELINE)
-										.addComponent(chosenSimptomi, GroupLayout.PREFERRED_SIZE, 145, GroupLayout.PREFERRED_SIZE)
-										.addComponent(allSimptomi, GroupLayout.PREFERRED_SIZE, 145, GroupLayout.PREFERRED_SIZE))))
-							.addGap(18))
-						.addGroup(gl_dijagnoze.createSequentialGroup()
-							.addGap(2)
-							.addComponent(logout)
-							.addGap(18)
-							.addComponent(lblPacijent)
-							.addPreferredGap(ComponentPlacement.RELATED)
-							.addComponent(pacijentBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-							.addPreferredGap(ComponentPlacement.RELATED, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-							.addComponent(lblBolest)
-							.addPreferredGap(ComponentPlacement.UNRELATED)
-							.addComponent(bolestiSimpBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-							.addGap(11)))
+					.addContainerGap()
+					.addGroup(gl_dijagnoze.createParallelGroup(Alignment.BASELINE)
+						.addComponent(lblNewLabel)
+						.addComponent(logout))
+					.addPreferredGap(ComponentPlacement.RELATED)
 					.addGroup(gl_dijagnoze.createParallelGroup(Alignment.LEADING)
-						.addComponent(prikaziSimptomeBtn)
-						.addComponent(dijagnozaButton)
-						.addComponent(btnPovezaneBolesti))
-					.addContainerGap(27, Short.MAX_VALUE))
+						.addGroup(gl_dijagnoze.createSequentialGroup()
+							.addGap(34)
+							.addComponent(addSimptom)
+							.addGap(18)
+							.addComponent(removeSimptom))
+						.addGroup(gl_dijagnoze.createSequentialGroup()
+							.addGroup(gl_dijagnoze.createParallelGroup(Alignment.BASELINE)
+								.addComponent(scrollPane_1, GroupLayout.PREFERRED_SIZE, 163, GroupLayout.PREFERRED_SIZE)
+								.addGroup(gl_dijagnoze.createSequentialGroup()
+									.addComponent(lblPacijent)
+									.addGap(11)
+									.addComponent(pacijentBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+									.addGap(14)
+									.addComponent(label)
+									.addGap(12)
+									.addComponent(bolestiSimpBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+									.addPreferredGap(ComponentPlacement.RELATED, 28, Short.MAX_VALUE)
+									.addComponent(prikaziSimptomeBtn)
+									.addGap(7)))
+							.addGap(3))
+						.addComponent(scrollPane, GroupLayout.PREFERRED_SIZE, 166, GroupLayout.PREFERRED_SIZE))
+					.addGap(8)
+					.addGroup(gl_dijagnoze.createParallelGroup(Alignment.BASELINE)
+						.addComponent(dijagnozaBtn)
+						.addComponent(povezaneBtn)))
 		);
+		
+		JList<String> allSimptomi = new JList<String>(model);
+		scrollPane.setViewportView(allSimptomi);
+		
+		JList<String> chosenSimptomi = new JList<String>(model);
+		scrollPane_1.setViewportView(chosenSimptomi);
 		dijagnoze.setLayout(gl_dijagnoze);
+		
+		
+		
+		addSimptom.addActionListener(new ActionListener() {
+		    public void actionPerformed(ActionEvent e) {
+		    	int index = allSimptomi.getSelectedIndex();
+		    	Vector<String> v1 = new Vector<String>();
+		    	Vector<String> v2 = new Vector<String>();
+		    	for (int i = 0; i < allSimptomi.getModel().getSize(); i++) {
+		    		v1.add(allSimptomi.getModel().getElementAt(i));
+		    	}
+		    	
+		    	if(chosenSimptomi.getModel().getSize() > 0) {
+			    	for (int i = 0; i < chosenSimptomi.getModel().getSize(); i++) {
+			    		v2.add(chosenSimptomi.getModel().getElementAt(i));
+			    	}
+		    	}
+		    	
+		    	if (index != -1) {
+		    		v2.add(v1.get(index));
+		    		v1.remove(index);
+		    		allSimptomi.setListData(v1);
+		    		allSimptomi.revalidate();
+		    		allSimptomi.repaint();
+		    		chosenSimptomi.setListData(v2);
+			    	chosenSimptomi.revalidate();
+			    	chosenSimptomi.repaint();
+		    	}
+		    	
+		    }
+		});
+		
+		removeSimptom.addActionListener(new ActionListener() {
+		    public void actionPerformed(ActionEvent e) {
+		    	int index = chosenSimptomi.getSelectedIndex();
+		    	Vector<String> v1 = new Vector<String>();
+		    	Vector<String> v2 = new Vector<String>();
+		    	for (int i = 0; i < chosenSimptomi.getModel().getSize(); i++) {
+		    		v1.add(chosenSimptomi.getModel().getElementAt(i));
+		    	}
+		    	
+		    	if(allSimptomi.getModel().getSize() > 0) {
+			    	for (int i = 0; i < allSimptomi.getModel().getSize(); i++) {
+			    		v2.add(allSimptomi.getModel().getElementAt(i));
+			    	}
+		    	}
+		    	
+		    	if (index != -1) {
+		    		v2.add(v1.get(index));
+		    		v1.remove(index);
+		    		chosenSimptomi.setListData(v1);
+		    		chosenSimptomi.revalidate();
+		    		chosenSimptomi.repaint();
+		    		allSimptomi.setListData(v2);
+			    	allSimptomi.revalidate();
+			    	allSimptomi.repaint();
+		    	}
+		    	
+		    }
+		    	
+		    
+		});
+		
+		prikaziSimptomeBtn.addActionListener(new ActionListener() {
+		    public void actionPerformed(ActionEvent e) {
+		    	Simptomi s = new Simptomi(bolestiSimpBox.getSelectedItem().toString());
+	    		s.setSize(250, 300);
+	    		s.setLocationRelativeTo(null);
+	    		s.setVisible(true);
+		    }
+		});
+		
+		dijagnozaBtn.addActionListener(new ActionListener() {
+		    public void actionPerformed(ActionEvent e) {
+		    	if (chosenSimptomi.getModel().getSize() < 1) {
+		    		JOptionPane.showMessageDialog(getContentPane(), "Morate izabrati bar jedan simptom!");
+		    		return;
+		    	}
+		    	String s = "";
+		    	for(int i = 0; i< chosenSimptomi.getModel().getSize();i++){
+		            s += chosenSimptomi.getModel().getElementAt(i);
+		            if(i < chosenSimptomi.getModel().getSize()-1) {
+		            	s += ",";
+		            }
+		        }
+		    	Dijagnoza d = new Dijagnoza(pacijentBox.getSelectedItem().toString(), logged, s);
+	    		d.setSize(500, 350);
+	    		d.setLocationRelativeTo(null);
+	    		d.setVisible(true);
+		    }
+		});
 		
 		JPanel izvestaji = new JPanel();
 		tabbedPane.addTab("Izvestaji", null, izvestaji, null);
 		
-		JButton logout1 = new JButton("Logout");
+		JButton logout1 = new JButton("Odjava");
 		
 		JComboBox izvestajBox = new JComboBox();
 		izvestajBox.setModel(new DefaultComboBoxModel(new String[] {"Spisak mogucih zavisnika", "Spisak pacijenata sa oslabljenim imunitetom", "Pacijenti sa mogucim hronicnim oboljenjima"}));
@@ -172,20 +291,99 @@ public class DoctorPanel extends JFrame {
 		JPanel monitoring = new JPanel();
 		tabbedPane.addTab("Monitoring", null, monitoring, null);
 		
-		JButton logout2 = new JButton("Logout");
+		JButton logout2 = new JButton("Odjava");
 		GroupLayout gl_monitoring = new GroupLayout(monitoring);
 		gl_monitoring.setHorizontalGroup(
 			gl_monitoring.createParallelGroup(Alignment.TRAILING)
 				.addGroup(gl_monitoring.createSequentialGroup()
-					.addContainerGap(349, Short.MAX_VALUE)
-					.addComponent(logout2, GroupLayout.PREFERRED_SIZE, 80, GroupLayout.PREFERRED_SIZE))
+					.addContainerGap(339, Short.MAX_VALUE)
+					.addComponent(logout2, GroupLayout.PREFERRED_SIZE, 80, GroupLayout.PREFERRED_SIZE)
+					.addContainerGap())
 		);
 		gl_monitoring.setVerticalGroup(
-			gl_monitoring.createParallelGroup(Alignment.LEADING)
-				.addGroup(Alignment.TRAILING, gl_monitoring.createSequentialGroup()
-					.addContainerGap(210, Short.MAX_VALUE)
-					.addComponent(logout2))
+			gl_monitoring.createParallelGroup(Alignment.TRAILING)
+				.addGroup(Alignment.LEADING, gl_monitoring.createSequentialGroup()
+					.addContainerGap()
+					.addComponent(logout2)
+					.addContainerGap(199, Short.MAX_VALUE))
 		);
 		monitoring.setLayout(gl_monitoring);
+		
+		Connection conn;
+		try {
+			conn = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:Orcl","c##ljemi","ljemi");
+			PreparedStatement statement1;
+			statement1 = conn.prepareStatement("select * from BOLESTI");
+			ResultSet result1 = statement1.executeQuery();
+			while(result1.next()) {
+				bolestiSimpBox.addItem(result1.getString("naziv"));
+			}
+
+			
+			PreparedStatement statement2;
+			statement2 = conn.prepareStatement("select * from PACIJENTI");
+			ResultSet result2 = statement2.executeQuery();
+			while(result2.next()) {
+				pacijentBox.addItem(result2.getInt("brkarte"));
+			}
+			
+			PreparedStatement statement3;
+			statement3 = conn.prepareStatement("select * from BOLESTI where simptomi is not null");
+			ResultSet result3 = statement3.executeQuery();
+			Set<String> hs = new HashSet<>();
+			Vector<String> as = new Vector<String>();
+			while(result3.next()) {
+				String s = result3.getString("simptomi");
+				ArrayList<String> a = toArrayList(s);
+				hs.addAll(a);
+			}
+			as.addAll(hs);
+
+			allSimptomi.setListData(as);
+			
+			conn.close();
+		}
+		catch (SQLException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		
+		class LogoutListener implements ActionListener{
+		    public void actionPerformed(ActionEvent event){
+		    	SwingUtilities.getWindowAncestor(logout1).dispose();
+	    		Login l = new Login();
+	    		l.setSize(450, 300);
+	    		l.setLocationRelativeTo(null);
+	    		l.setVisible(true);
+		    }
+		}
+		
+		
+		LogoutListener l = new LogoutListener();
+		logout.addActionListener(l);
+		logout1.addActionListener(l);
+		logout2.addActionListener(l);
+		
+		
+	}
+	
+	public static String toString(ArrayList<String> lista) {
+		String s = "";
+		for(int i = 0; i < lista.size(); i++) {
+			if(i != lista.size()-1)
+				s += lista.get(i) + ",";
+			else s += lista.get(i);
+		}
+		return s;
+	}
+	
+	public static ArrayList<String> toArrayList(String s) {
+		ArrayList<String> l = new ArrayList<String>();
+		StringTokenizer tokenizer = new StringTokenizer(s, ",");
+        
+        while (tokenizer.hasMoreTokens()) {
+            l.add(tokenizer.nextToken());
+        }        
+		return l;
 	}
 }

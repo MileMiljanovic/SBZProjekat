@@ -4,8 +4,19 @@ import javax.swing.JFrame;
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+
 import java.awt.Font;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.SQLIntegrityConstraintViolationException;
+
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 import javax.swing.JButton;
 import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.JTextArea;
@@ -38,8 +49,8 @@ public class NewMedicine extends JFrame {
 		JTextArea sastojciField = new JTextArea();
 		GroupLayout groupLayout = new GroupLayout(getContentPane());
 		groupLayout.setHorizontalGroup(
-			groupLayout.createParallelGroup(Alignment.LEADING)
-				.addGroup(Alignment.TRAILING, groupLayout.createSequentialGroup()
+			groupLayout.createParallelGroup(Alignment.TRAILING)
+				.addGroup(groupLayout.createSequentialGroup()
 					.addContainerGap(166, Short.MAX_VALUE)
 					.addComponent(lblDodajteNoviLek, GroupLayout.PREFERRED_SIZE, 143, GroupLayout.PREFERRED_SIZE)
 					.addGap(125))
@@ -51,10 +62,10 @@ public class NewMedicine extends JFrame {
 							.addGap(18)
 							.addComponent(nazivField, GroupLayout.PREFERRED_SIZE, 166, GroupLayout.PREFERRED_SIZE))
 						.addGroup(groupLayout.createSequentialGroup()
-							.addGap(36)
-							.addComponent(OKLek, GroupLayout.PREFERRED_SIZE, 47, GroupLayout.PREFERRED_SIZE)
+							.addGap(21)
+							.addComponent(OKLek, GroupLayout.PREFERRED_SIZE, 62, GroupLayout.PREFERRED_SIZE)
 							.addGap(60)
-							.addComponent(cancelLek, GroupLayout.PREFERRED_SIZE, 63, GroupLayout.PREFERRED_SIZE))
+							.addComponent(cancelLek, GroupLayout.PREFERRED_SIZE, 83, GroupLayout.PREFERRED_SIZE))
 						.addGroup(groupLayout.createSequentialGroup()
 							.addPreferredGap(ComponentPlacement.RELATED)
 							.addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
@@ -87,7 +98,7 @@ public class NewMedicine extends JFrame {
 						.addGroup(groupLayout.createSequentialGroup()
 							.addGap(31)
 							.addComponent(lblSastojci)
-							.addPreferredGap(ComponentPlacement.RELATED, 22, Short.MAX_VALUE))
+							.addPreferredGap(ComponentPlacement.RELATED, 64, Short.MAX_VALUE))
 						.addGroup(groupLayout.createSequentialGroup()
 							.addPreferredGap(ComponentPlacement.RELATED)
 							.addComponent(sastojciField, GroupLayout.PREFERRED_SIZE, 69, GroupLayout.PREFERRED_SIZE)
@@ -98,6 +109,38 @@ public class NewMedicine extends JFrame {
 					.addGap(21))
 		);
 		getContentPane().setLayout(groupLayout);
+		
+		cancelLek.addActionListener(new ActionListener() {
+		    public void actionPerformed(ActionEvent e) {
+		    	SwingUtilities.getWindowAncestor(cancelLek).dispose();
+		    }
+		});
+		
+		OKLek.addActionListener(new ActionListener() {
+		    public void actionPerformed(ActionEvent e) {
+		    	if(nazivField.getText().trim().equals("")) {
+		    		JOptionPane.showMessageDialog(getContentPane(), "Naziv leka ne sme da bude prazan!");
+		    		return;		    		
+		    	}
+		    	Connection con;
+				try {
+					con = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:Orcl","c##ljemi","ljemi");
+					PreparedStatement statement1;
+					statement1 = con.prepareStatement("insert into LEKOVI values('" + nazivField.getText() 
+					+"','"+ tipField.getText()+ "','" + sastojciField.getText() + "')");
+					statement1.executeQuery();
+					JOptionPane.showMessageDialog(getContentPane(), "Lek je uspesno dodat!");
+					con.close();
+					SwingUtilities.getWindowAncestor(OKLek).dispose();
+				}
+				catch (SQLException e1) {
+					if(e1 instanceof SQLIntegrityConstraintViolationException) {
+						JOptionPane.showMessageDialog(getContentPane(), "Lek sa tim nazivom vec postoji!");
+				    }
+					else e1.printStackTrace();
+				}
+		    }
+		});
 	}
 
 }

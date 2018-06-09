@@ -4,17 +4,29 @@ import javax.swing.JFrame;
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JButton;
 import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
+
 import java.awt.Font;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.SQLIntegrityConstraintViolationException;
 
 public class NewDoctor extends JFrame {
 	private JTextField usernameField;
 	private JTextField passwordField;
 	private JTextField imeLField;
 	private JTextField prezimeLField;
+	
 	public NewDoctor() {
+		
 		setTitle("Novi lekar");
 		
 		JLabel lblNewLabel = new JLabel("Korisnicko ime:");
@@ -55,26 +67,28 @@ public class NewDoctor extends JFrame {
 								.addComponent(lblIme, GroupLayout.PREFERRED_SIZE, 83, GroupLayout.PREFERRED_SIZE)
 								.addComponent(lblLozinka, GroupLayout.PREFERRED_SIZE, 83, GroupLayout.PREFERRED_SIZE)
 								.addComponent(lblNewLabel, GroupLayout.PREFERRED_SIZE, 83, GroupLayout.PREFERRED_SIZE)
-								.addComponent(OKLekar))
-							.addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
 								.addGroup(groupLayout.createSequentialGroup()
-									.addGap(74)
-									.addComponent(cancelDoktor))
+									.addComponent(OKLekar, GroupLayout.PREFERRED_SIZE, 60, GroupLayout.PREFERRED_SIZE)
+									.addPreferredGap(ComponentPlacement.RELATED)))
+							.addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
 								.addGroup(groupLayout.createSequentialGroup()
 									.addGap(18)
 									.addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
 										.addComponent(passwordField, GroupLayout.PREFERRED_SIZE, 166, GroupLayout.PREFERRED_SIZE)
 										.addComponent(usernameField, GroupLayout.PREFERRED_SIZE, 166, GroupLayout.PREFERRED_SIZE)
 										.addComponent(imeLField, GroupLayout.PREFERRED_SIZE, 166, GroupLayout.PREFERRED_SIZE)
-										.addComponent(prezimeLField, GroupLayout.PREFERRED_SIZE, 166, GroupLayout.PREFERRED_SIZE)))))
+										.addComponent(prezimeLField, GroupLayout.PREFERRED_SIZE, 166, GroupLayout.PREFERRED_SIZE)))
+								.addGroup(groupLayout.createSequentialGroup()
+									.addGap(74)
+									.addComponent(cancelDoktor, GroupLayout.PREFERRED_SIZE, 84, GroupLayout.PREFERRED_SIZE))))
 						.addGroup(groupLayout.createSequentialGroup()
 							.addGap(137)
 							.addComponent(lblDodajteNovogDoktora, GroupLayout.PREFERRED_SIZE, 143, GroupLayout.PREFERRED_SIZE)))
 					.addContainerGap(99, Short.MAX_VALUE))
 		);
 		groupLayout.setVerticalGroup(
-			groupLayout.createParallelGroup(Alignment.LEADING)
-				.addGroup(Alignment.TRAILING, groupLayout.createSequentialGroup()
+			groupLayout.createParallelGroup(Alignment.TRAILING)
+				.addGroup(groupLayout.createSequentialGroup()
 					.addGap(10)
 					.addComponent(lblDodajteNovogDoktora, GroupLayout.PREFERRED_SIZE, 21, GroupLayout.PREFERRED_SIZE)
 					.addPreferredGap(ComponentPlacement.UNRELATED)
@@ -100,6 +114,38 @@ public class NewDoctor extends JFrame {
 					.addGap(29))
 		);
 		getContentPane().setLayout(groupLayout);
+		
+		cancelDoktor.addActionListener(new ActionListener() {
+		    public void actionPerformed(ActionEvent e) {
+		    	SwingUtilities.getWindowAncestor(cancelDoktor).dispose();
+		    }
+		});
+		
+		OKLekar.addActionListener(new ActionListener() {
+		    public void actionPerformed(ActionEvent e) {
+		    	if(usernameField.getText().trim().equals("")) {
+		    		JOptionPane.showMessageDialog(getContentPane(), "Korisnicko ime ne sme da bude prazno!");
+		    		return;		    		
+		    	}
+		    	Connection con;
+				try {
+					con = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:Orcl","c##ljemi","ljemi");
+					PreparedStatement statement1;
+					statement1 = con.prepareStatement("insert into LEKARI values('" + usernameField.getText() 
+					+"','"+ passwordField.getText()+ "','" + imeLField.getText() + "','" + prezimeLField.getText() + "')");
+					statement1.executeQuery();
+					JOptionPane.showMessageDialog(getContentPane(), "Lekar je uspesno dodat!");
+					con.close();
+					SwingUtilities.getWindowAncestor(OKLekar).dispose();
+				}
+				catch (SQLException e1) {
+					if(e1 instanceof SQLIntegrityConstraintViolationException) {
+						JOptionPane.showMessageDialog(getContentPane(), "Korisnicko ime vec postoji!");
+				    }
+					else e1.printStackTrace();
+				}
+		    }
+		});
 	}
 
 }

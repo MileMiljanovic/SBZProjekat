@@ -4,9 +4,20 @@ import javax.swing.JFrame;
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+
 import java.awt.Font;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.SQLIntegrityConstraintViolationException;
+
 import javax.swing.JButton;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.JTextArea;
 
@@ -14,7 +25,9 @@ public class NewPatient extends JFrame {
 	private JTextField prezimePField;
 	private JTextField imePField;
 	private JTextField brKarteField;
+	
 	public NewPatient() {
+		
 		setTitle("Novi pacijent");
 		
 		JLabel lblDodajteNovogPacijenta = new JLabel("Dodajte novog pacijenta:");
@@ -68,16 +81,18 @@ public class NewPatient extends JFrame {
 						.addGroup(groupLayout.createSequentialGroup()
 							.addContainerGap()
 							.addGroup(groupLayout.createParallelGroup(Alignment.TRAILING)
-								.addComponent(OKPacijent, GroupLayout.PREFERRED_SIZE, 47, GroupLayout.PREFERRED_SIZE)
-								.addComponent(lblAlergijeodvojeneZarezima))
+								.addComponent(lblAlergijeodvojeneZarezima)
+								.addGroup(groupLayout.createSequentialGroup()
+									.addComponent(OKPacijent, GroupLayout.PREFERRED_SIZE, 61, GroupLayout.PREFERRED_SIZE)
+									.addPreferredGap(ComponentPlacement.RELATED)))
 							.addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
 								.addGroup(groupLayout.createSequentialGroup()
 									.addPreferredGap(ComponentPlacement.RELATED)
 									.addComponent(alergijeField, GroupLayout.PREFERRED_SIZE, 247, GroupLayout.PREFERRED_SIZE))
 								.addGroup(groupLayout.createSequentialGroup()
-									.addGap(88)
-									.addComponent(cancelPacijent, GroupLayout.PREFERRED_SIZE, 63, GroupLayout.PREFERRED_SIZE)))))
-					.addContainerGap(32, Short.MAX_VALUE))
+									.addGap(73)
+									.addComponent(cancelPacijent, GroupLayout.PREFERRED_SIZE, 78, GroupLayout.PREFERRED_SIZE)))))
+					.addContainerGap(30, Short.MAX_VALUE))
 		);
 		groupLayout.setVerticalGroup(
 			groupLayout.createParallelGroup(Alignment.LEADING)
@@ -107,5 +122,37 @@ public class NewPatient extends JFrame {
 					.addGap(23))
 		);
 		getContentPane().setLayout(groupLayout);
+		
+		cancelPacijent.addActionListener(new ActionListener() {
+		    public void actionPerformed(ActionEvent e) {
+		    	SwingUtilities.getWindowAncestor(cancelPacijent).dispose();
+		    }
+		});
+		
+		OKPacijent.addActionListener(new ActionListener() {
+		    public void actionPerformed(ActionEvent e) {
+		    	if(brKarteField.getText().trim().equals("")) {
+		    		JOptionPane.showMessageDialog(getContentPane(), "Korisnicko ime ne sme da bude prazno!");
+		    		return;		    		
+		    	}
+		    	Connection con;
+				try {
+					con = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:Orcl","c##ljemi","ljemi");
+					PreparedStatement statement1;
+					statement1 = con.prepareStatement("insert into PACIJENTI values(" + brKarteField.getText() 
+					+",'"+ imePField.getText()+ "','" + prezimePField.getText() + "','" + alergijeField.getText() + "')");
+					statement1.executeQuery();
+					JOptionPane.showMessageDialog(getContentPane(), "Pacijent je uspesno dodat!");
+					con.close();
+					SwingUtilities.getWindowAncestor(OKPacijent).dispose();
+				}
+				catch (SQLException e1) {
+					if(e1 instanceof SQLIntegrityConstraintViolationException) {
+						JOptionPane.showMessageDialog(getContentPane(), "Broj karte je zauzet!");
+				    }
+					else e1.printStackTrace();
+				}
+		    }
+		});
 	}
 }
