@@ -16,6 +16,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -26,6 +27,7 @@ import java.util.Vector;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.LayoutStyle.ComponentPlacement;
+import javax.swing.table.DefaultTableModel;
 import javax.swing.ListSelectionModel;
 import javax.swing.JTable;
 import javax.swing.SwingUtilities;
@@ -41,8 +43,11 @@ public class DoctorPanel extends JFrame {
 	 */
 	private static final long serialVersionUID = 1L;
 	private JTable table;
+	private JTable allPacijenti;
+	private JTable dijagnozeTable;
 	
 	public DoctorPanel(String logged) {
+		
 		setTitle("Dijagnosticki panel");
 		getContentPane().setLayout(new BorderLayout(0, 0));
 		
@@ -78,6 +83,9 @@ public class DoctorPanel extends JFrame {
 		JComboBox bolestiSimpBox = new JComboBox();
 		
 		JButton prikaziSimptomeBtn = new JButton("Prikazi simptome");
+		
+		JLabel loggedLabel = new JLabel("Ulogovani ste kao: " + logged);
+		
 		GroupLayout gl_dijagnoze = new GroupLayout(dijagnoze);
 		gl_dijagnoze.setHorizontalGroup(
 			gl_dijagnoze.createParallelGroup(Alignment.LEADING)
@@ -86,8 +94,8 @@ public class DoctorPanel extends JFrame {
 					.addGroup(gl_dijagnoze.createParallelGroup(Alignment.LEADING)
 						.addGroup(gl_dijagnoze.createSequentialGroup()
 							.addComponent(lblNewLabel)
-							.addPreferredGap(ComponentPlacement.RELATED, 196, Short.MAX_VALUE)
-							.addComponent(logout))
+							.addPreferredGap(ComponentPlacement.RELATED, 209, Short.MAX_VALUE)
+							.addComponent(loggedLabel))
 						.addGroup(gl_dijagnoze.createSequentialGroup()
 							.addGroup(gl_dijagnoze.createParallelGroup(Alignment.LEADING)
 								.addGroup(gl_dijagnoze.createSequentialGroup()
@@ -105,11 +113,12 @@ public class DoctorPanel extends JFrame {
 								.addComponent(scrollPane_1, GroupLayout.PREFERRED_SIZE, 119, GroupLayout.PREFERRED_SIZE))
 							.addPreferredGap(ComponentPlacement.UNRELATED)
 							.addGroup(gl_dijagnoze.createParallelGroup(Alignment.LEADING)
-								.addComponent(prikaziSimptomeBtn, GroupLayout.DEFAULT_SIZE, 111, Short.MAX_VALUE)
 								.addComponent(lblPacijent)
 								.addComponent(pacijentBox, 0, 111, Short.MAX_VALUE)
+								.addComponent(label, GroupLayout.PREFERRED_SIZE, 54, GroupLayout.PREFERRED_SIZE)
 								.addComponent(bolestiSimpBox, 0, 111, Short.MAX_VALUE)
-								.addComponent(label, GroupLayout.PREFERRED_SIZE, 54, GroupLayout.PREFERRED_SIZE))))
+								.addComponent(prikaziSimptomeBtn, GroupLayout.DEFAULT_SIZE, 111, Short.MAX_VALUE)
+								.addComponent(logout, Alignment.TRAILING))))
 					.addContainerGap())
 		);
 		gl_dijagnoze.setVerticalGroup(
@@ -118,7 +127,7 @@ public class DoctorPanel extends JFrame {
 					.addContainerGap()
 					.addGroup(gl_dijagnoze.createParallelGroup(Alignment.BASELINE)
 						.addComponent(lblNewLabel)
-						.addComponent(logout))
+						.addComponent(loggedLabel))
 					.addPreferredGap(ComponentPlacement.RELATED)
 					.addGroup(gl_dijagnoze.createParallelGroup(Alignment.LEADING)
 						.addGroup(gl_dijagnoze.createSequentialGroup()
@@ -130,22 +139,23 @@ public class DoctorPanel extends JFrame {
 							.addGroup(gl_dijagnoze.createParallelGroup(Alignment.BASELINE)
 								.addComponent(scrollPane_1, GroupLayout.PREFERRED_SIZE, 163, GroupLayout.PREFERRED_SIZE)
 								.addGroup(gl_dijagnoze.createSequentialGroup()
+									.addComponent(logout)
+									.addGap(18)
 									.addComponent(lblPacijent)
-									.addGap(11)
+									.addPreferredGap(ComponentPlacement.RELATED, 18, Short.MAX_VALUE)
 									.addComponent(pacijentBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-									.addGap(14)
+									.addGap(19)
 									.addComponent(label)
-									.addGap(12)
+									.addGap(15)
 									.addComponent(bolestiSimpBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-									.addPreferredGap(ComponentPlacement.RELATED, 28, Short.MAX_VALUE)
-									.addComponent(prikaziSimptomeBtn)
 									.addGap(7)))
 							.addGap(3))
 						.addComponent(scrollPane, GroupLayout.PREFERRED_SIZE, 166, GroupLayout.PREFERRED_SIZE))
 					.addGap(8)
 					.addGroup(gl_dijagnoze.createParallelGroup(Alignment.BASELINE)
 						.addComponent(dijagnozaBtn)
-						.addComponent(povezaneBtn)))
+						.addComponent(povezaneBtn)
+						.addComponent(prikaziSimptomeBtn)))
 		);
 		
 		JList<String> allSimptomi = new JList<String>(model);
@@ -239,6 +249,7 @@ public class DoctorPanel extends JFrame {
 		            	s += ",";
 		            }
 		        }
+		    	SwingUtilities.getWindowAncestor(dijagnozaBtn).dispose();
 		    	Dijagnoza d = new Dijagnoza(pacijentBox.getSelectedItem().toString(), logged, s);
 	    		d.setSize(500, 350);
 	    		d.setLocationRelativeTo(null);
@@ -309,6 +320,9 @@ public class DoctorPanel extends JFrame {
 		);
 		monitoring.setLayout(gl_monitoring);
 		
+		JButton logout3 = new JButton("Odjava");
+		JButton logout4 = new JButton("Odjava");
+		
 		Connection conn;
 		try {
 			conn = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:Orcl","c##ljemi","ljemi");
@@ -341,6 +355,89 @@ public class DoctorPanel extends JFrame {
 
 			allSimptomi.setListData(as);
 			
+			JPanel pacijenti = new JPanel();
+			tabbedPane.addTab("Pacijenti", null, pacijenti, null);
+			
+			JScrollPane scrollPane_2 = new JScrollPane();
+			
+			JLabel lblNewLabel_1 = new JLabel("Pregled svih pacijenata:");
+			
+			
+			GroupLayout gl_pacijenti = new GroupLayout(pacijenti);
+			gl_pacijenti.setHorizontalGroup(
+				gl_pacijenti.createParallelGroup(Alignment.LEADING)
+					.addGroup(gl_pacijenti.createSequentialGroup()
+						.addContainerGap()
+						.addGroup(gl_pacijenti.createParallelGroup(Alignment.LEADING)
+							.addGroup(Alignment.TRAILING, gl_pacijenti.createSequentialGroup()
+								.addComponent(lblNewLabel_1, GroupLayout.PREFERRED_SIZE, 136, GroupLayout.PREFERRED_SIZE)
+								.addPreferredGap(ComponentPlacement.RELATED, 178, Short.MAX_VALUE)
+								.addComponent(logout3, GroupLayout.PREFERRED_SIZE, 95, GroupLayout.PREFERRED_SIZE))
+							.addComponent(scrollPane_2, GroupLayout.DEFAULT_SIZE, 409, Short.MAX_VALUE))
+						.addContainerGap())
+			);
+			gl_pacijenti.setVerticalGroup(
+				gl_pacijenti.createParallelGroup(Alignment.TRAILING)
+					.addGroup(gl_pacijenti.createSequentialGroup()
+						.addGroup(gl_pacijenti.createParallelGroup(Alignment.BASELINE)
+							.addComponent(logout3, GroupLayout.PREFERRED_SIZE, 21, GroupLayout.PREFERRED_SIZE)
+							.addComponent(lblNewLabel_1))
+						.addPreferredGap(ComponentPlacement.RELATED)
+						.addComponent(scrollPane_2, GroupLayout.PREFERRED_SIZE, 191, GroupLayout.PREFERRED_SIZE)
+						.addContainerGap())
+			);
+			
+			PreparedStatement statement5;
+			statement5 = conn.prepareStatement("select * from PACIJENTI");
+			ResultSet result5 = statement5.executeQuery();
+			allPacijenti = new JTable(buildTableModel(result5));
+			allPacijenti.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+			scrollPane_2.setViewportView(allPacijenti);
+			pacijenti.setLayout(gl_pacijenti);
+			
+			JPanel allDijagnoze = new JPanel();
+			tabbedPane.addTab("Pregled dijagnoza", null, allDijagnoze, null);
+			
+			JLabel lblPregledSvihDijagnoza = new JLabel("Pregled svih dijagnoza:");
+			
+			JScrollPane scrollPane_3 = new JScrollPane();
+			
+			
+			GroupLayout gl_allDijagnoze = new GroupLayout(allDijagnoze);
+			gl_allDijagnoze.setHorizontalGroup(
+				gl_allDijagnoze.createParallelGroup(Alignment.LEADING)
+					.addGroup(gl_allDijagnoze.createSequentialGroup()
+						.addContainerGap()
+						.addGroup(gl_allDijagnoze.createParallelGroup(Alignment.LEADING)
+							.addComponent(scrollPane_3, GroupLayout.DEFAULT_SIZE, 409, Short.MAX_VALUE)
+							.addGroup(gl_allDijagnoze.createSequentialGroup()
+								.addComponent(lblPregledSvihDijagnoza, GroupLayout.PREFERRED_SIZE, 136, GroupLayout.PREFERRED_SIZE)
+								.addPreferredGap(ComponentPlacement.RELATED, 179, Short.MAX_VALUE)
+								.addComponent(logout4, GroupLayout.PREFERRED_SIZE, 94, GroupLayout.PREFERRED_SIZE)))
+						.addContainerGap())
+			);
+			gl_allDijagnoze.setVerticalGroup(
+				gl_allDijagnoze.createParallelGroup(Alignment.LEADING)
+					.addGroup(gl_allDijagnoze.createSequentialGroup()
+						.addGroup(gl_allDijagnoze.createParallelGroup(Alignment.BASELINE)
+							.addComponent(lblPregledSvihDijagnoza)
+							.addComponent(logout4, GroupLayout.PREFERRED_SIZE, 21, GroupLayout.PREFERRED_SIZE))
+						.addPreferredGap(ComponentPlacement.RELATED)
+						.addComponent(scrollPane_3, GroupLayout.PREFERRED_SIZE, 191, GroupLayout.PREFERRED_SIZE)
+						.addContainerGap())
+			);
+			
+			
+
+			PreparedStatement statement4;
+			statement4 = conn.prepareStatement("select * from DIJAGNOZE");
+			ResultSet result4 = statement4.executeQuery();
+			dijagnozeTable = new JTable(buildTableModel(result4));
+			dijagnozeTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+			
+			scrollPane_3.setViewportView(dijagnozeTable);
+			allDijagnoze.setLayout(gl_allDijagnoze);
+			
 			conn.close();
 		}
 		catch (SQLException e1) {
@@ -363,6 +460,8 @@ public class DoctorPanel extends JFrame {
 		logout.addActionListener(l);
 		logout1.addActionListener(l);
 		logout2.addActionListener(l);
+		logout3.addActionListener(l);
+		logout4.addActionListener(l); 
 		
 		
 	}
@@ -385,5 +484,31 @@ public class DoctorPanel extends JFrame {
             l.add(tokenizer.nextToken());
         }        
 		return l;
+	}
+	
+	public static DefaultTableModel buildTableModel(ResultSet rs)
+	        throws SQLException {
+
+	    ResultSetMetaData metaData = rs.getMetaData();
+
+	    // names of columns
+	    Vector<String> columnNames = new Vector<String>();
+	    int columnCount = metaData.getColumnCount();
+	    for (int column = 1; column <= columnCount; column++) {
+	        columnNames.add(metaData.getColumnName(column));
+	    }
+
+	    // data of the table
+	    Vector<Vector<Object>> data = new Vector<Vector<Object>>();
+	    while (rs.next()) {
+	        Vector<Object> vector = new Vector<Object>();
+	        for (int columnIndex = 1; columnIndex <= columnCount; columnIndex++) {
+	            vector.add(rs.getObject(columnIndex));
+	        }
+	        data.add(vector);
+	    }
+
+	    return new DefaultTableModel(data, columnNames);
+
 	}
 }

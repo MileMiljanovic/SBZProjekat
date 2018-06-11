@@ -118,6 +118,10 @@ public class NewDoctor extends JFrame {
 		cancelDoktor.addActionListener(new ActionListener() {
 		    public void actionPerformed(ActionEvent e) {
 		    	SwingUtilities.getWindowAncestor(cancelDoktor).dispose();
+		    	AdminPanel d = new AdminPanel();
+	    		d.setSize(600, 400);
+	    		d.setLocationRelativeTo(null);
+	    		d.setVisible(true);
 		    }
 		});
 		
@@ -137,6 +141,10 @@ public class NewDoctor extends JFrame {
 					JOptionPane.showMessageDialog(getContentPane(), "Lekar je uspesno dodat!");
 					con.close();
 					SwingUtilities.getWindowAncestor(OKLekar).dispose();
+					AdminPanel d = new AdminPanel();
+		    		d.setSize(600, 400);
+		    		d.setLocationRelativeTo(null);
+		    		d.setVisible(true);
 				}
 				catch (SQLException e1) {
 					if(e1 instanceof SQLIntegrityConstraintViolationException) {

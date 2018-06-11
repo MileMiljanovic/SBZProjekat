@@ -240,6 +240,10 @@ public class Dijagnoza extends JFrame {
 		cancelDiag.addActionListener(new ActionListener() {
 		    public void actionPerformed(ActionEvent e) {
 		    	SwingUtilities.getWindowAncestor(cancelDiag).dispose();
+		    	DoctorPanel d = new DoctorPanel(doktor);
+	    		d.setSize(600, 350);
+	    		d.setLocationRelativeTo(null);
+	    		d.setVisible(true);
 		    }
 		});
 		
@@ -273,6 +277,10 @@ public class Dijagnoza extends JFrame {
 					JOptionPane.showMessageDialog(getContentPane(), "Dijagnoza je uspesno dodata!");
 					con.close();
 					SwingUtilities.getWindowAncestor(OKDiag).dispose();
+					DoctorPanel dp = new DoctorPanel(doktor);
+		    		dp.setSize(600, 350);
+		    		dp.setLocationRelativeTo(null);
+		    		dp.setVisible(true);
 				}
 				catch (SQLException e1) {
 					e1.printStackTrace();

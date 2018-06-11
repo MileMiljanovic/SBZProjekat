@@ -128,6 +128,10 @@ public class EditSickness extends JFrame {
 		cancelSicknessE.addActionListener(new ActionListener() {
 		    public void actionPerformed(ActionEvent e) {
 		    	SwingUtilities.getWindowAncestor(cancelSicknessE).dispose();
+		    	AdminPanel d = new AdminPanel();
+	    		d.setSize(600, 400);
+	    		d.setLocationRelativeTo(null);
+	    		d.setVisible(true);
 		    }
 		});
 		
@@ -144,6 +148,10 @@ public class EditSickness extends JFrame {
 					JOptionPane.showMessageDialog(getContentPane(), "Bolest je uspesno izmenjena!");
 					con.close();
 					SwingUtilities.getWindowAncestor(OKSicknessE).dispose();
+					AdminPanel d = new AdminPanel();
+		    		d.setSize(600, 400);
+		    		d.setLocationRelativeTo(null);
+		    		d.setVisible(true);
 				}
 				catch (SQLException e1) {
 					// TODO Auto-generated catch block

@@ -469,6 +469,7 @@ public class AdminPanel extends JFrame {
 		
 		dodajLekara.addActionListener(new ActionListener() {
 		    public void actionPerformed(ActionEvent e) {
+		    	SwingUtilities.getWindowAncestor(dodajLekara).dispose();
 		    	NewDoctor d = new NewDoctor();
 	    		d.setSize(450, 300);
 	    		d.setLocationRelativeTo(null);
@@ -478,6 +479,7 @@ public class AdminPanel extends JFrame {
 		
 		dodajPacijent.addActionListener(new ActionListener() {
 		    public void actionPerformed(ActionEvent e) {
+		    	SwingUtilities.getWindowAncestor(dodajLekara).dispose();
 		    	NewPatient d = new NewPatient();
 	    		d.setSize(450, 300);
 	    		d.setLocationRelativeTo(null);
@@ -487,6 +489,7 @@ public class AdminPanel extends JFrame {
 		
 		dodajLek.addActionListener(new ActionListener() {
 		    public void actionPerformed(ActionEvent e) {
+		    	SwingUtilities.getWindowAncestor(dodajLekara).dispose();
 		    	NewMedicine d = new NewMedicine();
 	    		d.setSize(450, 300);
 	    		d.setLocationRelativeTo(null);
@@ -496,6 +499,7 @@ public class AdminPanel extends JFrame {
 		
 		dodajBolest.addActionListener(new ActionListener() {
 		    public void actionPerformed(ActionEvent e) {
+		    	SwingUtilities.getWindowAncestor(dodajLekara).dispose();
 		    	NewSickness d = new NewSickness();
 	    		d.setSize(450, 300);
 	    		d.setLocationRelativeTo(null);
@@ -505,6 +509,7 @@ public class AdminPanel extends JFrame {
 		
 		izmeniLekara.addActionListener(new ActionListener() {
 		    public void actionPerformed(ActionEvent e) {
+		    	SwingUtilities.getWindowAncestor(dodajLekara).dispose();
 		    	EditDoctor d = new EditDoctor(izmeniLekaraBox.getSelectedItem().toString());
 	    		d.setSize(450, 300);
 	    		d.setLocationRelativeTo(null);
@@ -514,6 +519,7 @@ public class AdminPanel extends JFrame {
 		
 		izmeniPacijenta.addActionListener(new ActionListener() {
 		    public void actionPerformed(ActionEvent e) {
+		    	SwingUtilities.getWindowAncestor(dodajLekara).dispose();
 		    	EditPatient d = new EditPatient(izmeniPacijentaBox.getSelectedItem().toString());
 	    		d.setSize(450, 300);
 	    		d.setLocationRelativeTo(null);
@@ -523,6 +529,7 @@ public class AdminPanel extends JFrame {
 		
 		izmeniLek.addActionListener(new ActionListener() {
 		    public void actionPerformed(ActionEvent e) {
+		    	SwingUtilities.getWindowAncestor(dodajLekara).dispose();
 		    	EditMedicine d = new EditMedicine(izmeniLekBox.getSelectedItem().toString());
 	    		d.setSize(450, 300);
 	    		d.setLocationRelativeTo(null);
@@ -532,6 +539,7 @@ public class AdminPanel extends JFrame {
 		
 		izmeniBolest.addActionListener(new ActionListener() {
 		    public void actionPerformed(ActionEvent e) {
+		    	SwingUtilities.getWindowAncestor(dodajLekara).dispose();
 		    	EditSickness d = new EditSickness(izmeniBolestBox.getSelectedItem().toString());
 	    		d.setSize(450, 300);
 	    		d.setLocationRelativeTo(null);
@@ -551,6 +559,10 @@ public class AdminPanel extends JFrame {
 					int index = obrisiLekaraBox.getSelectedIndex();
 					obrisiLekaraBox.removeItemAt(index);
 					izmeniLekaraBox.removeItemAt(index);
+					PreparedStatement statement2;
+					statement2 = con.prepareStatement("select * from LEKARI");
+					ResultSet result2 = statement2.executeQuery();
+					lekariTable.setModel(buildTableModel(result2));
 					con.close();
 				}
 				catch (SQLException e1) {
@@ -572,6 +584,10 @@ public class AdminPanel extends JFrame {
 					int index = obrisiPacijentaBox.getSelectedIndex();
 					obrisiPacijentaBox.removeItemAt(index);
 					izmeniPacijentaBox.removeItemAt(index);
+					PreparedStatement statement2;
+					statement2 = con.prepareStatement("select * from PACIJENTI");
+					ResultSet result2 = statement2.executeQuery();
+					pacijentiTable.setModel(buildTableModel(result2));
 					con.close();
 				}
 				catch (SQLException e1) {
@@ -593,6 +609,10 @@ public class AdminPanel extends JFrame {
 					int index = obrisiBolestBox.getSelectedIndex();
 					obrisiBolestBox.removeItemAt(index);
 					izmeniBolestBox.removeItemAt(index);
+					PreparedStatement statement2;
+					statement2 = con.prepareStatement("select * from BOLESTI");
+					ResultSet result2 = statement2.executeQuery();
+					bolestiTable.setModel(buildTableModel(result2));
 					con.close();
 				}
 				catch (SQLException e1) {
@@ -614,6 +634,10 @@ public class AdminPanel extends JFrame {
 					int index = obrisiLekBox.getSelectedIndex();
 					obrisiLekBox.removeItemAt(index);
 					izmeniLekBox.removeItemAt(index);
+					PreparedStatement statement2;
+					statement2 = con.prepareStatement("select * from LEKOVI");
+					ResultSet result2 = statement2.executeQuery();
+					lekoviTable.setModel(buildTableModel(result2));
 					con.close();
 				}
 				catch (SQLException e1) {

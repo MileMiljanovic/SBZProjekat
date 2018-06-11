@@ -108,6 +108,10 @@ public class NewSickness extends JFrame {
 		cancelSickness.addActionListener(new ActionListener() {
 		    public void actionPerformed(ActionEvent e) {
 		    	SwingUtilities.getWindowAncestor(cancelSickness).dispose();
+		    	AdminPanel d = new AdminPanel();
+	    		d.setSize(600, 400);
+	    		d.setLocationRelativeTo(null);
+	    		d.setVisible(true);
 		    }
 		});
 		
@@ -127,6 +131,10 @@ public class NewSickness extends JFrame {
 					JOptionPane.showMessageDialog(getContentPane(), "Bolest je uspesno dodata!");
 					con.close();
 					SwingUtilities.getWindowAncestor(OKSickness).dispose();
+					AdminPanel d = new AdminPanel();
+		    		d.setSize(600, 400);
+		    		d.setLocationRelativeTo(null);
+		    		d.setVisible(true);
 				}
 				catch (SQLException e1) {
 					// TODO Auto-generated catch block

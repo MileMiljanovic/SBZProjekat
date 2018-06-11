@@ -141,6 +141,10 @@ public class EditMedicine extends JFrame {
 		cancelLekE.addActionListener(new ActionListener() {
 		    public void actionPerformed(ActionEvent e) {
 		    	SwingUtilities.getWindowAncestor(cancelLekE).dispose();
+		    	AdminPanel d = new AdminPanel();
+	    		d.setSize(600, 400);
+	    		d.setLocationRelativeTo(null);
+	    		d.setVisible(true);
 		    }
 		});
 		
@@ -157,6 +161,10 @@ public class EditMedicine extends JFrame {
 					JOptionPane.showMessageDialog(getContentPane(), "Lek je uspesno izmenjen!");
 					con.close();
 					SwingUtilities.getWindowAncestor(OKLekE).dispose();
+					AdminPanel d = new AdminPanel();
+		    		d.setSize(600, 400);
+		    		d.setLocationRelativeTo(null);
+		    		d.setVisible(true);
 				}
 				catch (SQLException e1) {
 					// TODO Auto-generated catch block
