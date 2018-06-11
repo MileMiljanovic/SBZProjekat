@@ -28,6 +28,14 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.table.DefaultTableModel;
+
+import org.kie.api.runtime.KieContainer;
+import org.kie.api.runtime.KieSession;
+
+import com.sample.model.Bolest;
+import com.sample.model.Symptom;
+import com.sample.app.KnowledgeSessionHelper;
+
 import javax.swing.ListSelectionModel;
 import javax.swing.JTable;
 import javax.swing.SwingUtilities;
@@ -236,19 +244,33 @@ public class DoctorPanel extends JFrame {
 		    }
 		});
 		
+		KieContainer kc = KnowledgeSessionHelper.createRuleBase();
+		KieSession kSession = KnowledgeSessionHelper.getStatefulKnowledgeSession(kc, "ksession-rules");
+		
+		
 		dijagnozaBtn.addActionListener(new ActionListener() {
 		    public void actionPerformed(ActionEvent e) {
 		    	if (chosenSimptomi.getModel().getSize() < 1) {
 		    		JOptionPane.showMessageDialog(getContentPane(), "Morate izabrati bar jedan simptom!");
 		    		return;
 		    	}
+
 		    	String s = "";
+		    						
 		    	for(int i = 0; i< chosenSimptomi.getModel().getSize();i++){
 		            s += chosenSimptomi.getModel().getElementAt(i);
 		            if(i < chosenSimptomi.getModel().getSize()-1) {
 		            	s += ",";
 		            }
+		            Symptom sy = new Symptom(chosenSimptomi.getModel().getElementAt(i));
+		            kSession.insert(sy);
 		        }
+		    	
+		    	
+				int fired = kSession.fireAllRules();
+			    System.out.println(fired);
+			    kSession.dispose();
+			    
 		    	SwingUtilities.getWindowAncestor(dijagnozaBtn).dispose();
 		    	Dijagnoza d = new Dijagnoza(pacijentBox.getSelectedItem().toString(), logged, s);
 	    		d.setSize(500, 350);
@@ -331,6 +353,11 @@ public class DoctorPanel extends JFrame {
 			ResultSet result1 = statement1.executeQuery();
 			while(result1.next()) {
 				bolestiSimpBox.addItem(result1.getString("naziv"));
+				Bolest b = new Bolest();
+				b.setNaziv(result1.getString("naziv"));
+				b.setGrupa(result1.getString("grupa"));
+				b.setSimptomi(toArrayList(result1.getString("simptomi")));
+				kSession.insert(b);
 			}
 
 			
@@ -462,7 +489,6 @@ public class DoctorPanel extends JFrame {
 		logout2.addActionListener(l);
 		logout3.addActionListener(l);
 		logout4.addActionListener(l); 
-		
 		
 	}
 	

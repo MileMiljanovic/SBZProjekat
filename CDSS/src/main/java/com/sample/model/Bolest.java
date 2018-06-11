@@ -5,7 +5,7 @@ import java.util.ArrayList;
 public class Bolest {
 	
 	private String naziv;
-	private Integer grupa;
+	private String grupa;
 	private ArrayList<String> simptomi;
 	
 	public Bolest() {
@@ -13,7 +13,7 @@ public class Bolest {
 		// TODO Auto-generated constructor stub
 	}
 
-	public Bolest(String naziv, Integer grupa, ArrayList<String> simptomi) {
+	public Bolest(String naziv, String grupa, ArrayList<String> simptomi) {
 		super();
 		this.naziv = naziv;
 		this.grupa = grupa;
@@ -28,11 +28,11 @@ public class Bolest {
 		this.naziv = naziv;
 	}
 
-	public Integer getGrupa() {
+	public String getGrupa() {
 		return grupa;
 	}
 
-	public void setGrupa(Integer grupa) {
+	public void setGrupa(String grupa) {
 		this.grupa = grupa;
 	}
 
