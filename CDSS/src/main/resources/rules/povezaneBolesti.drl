@@ -1,0 +1,25 @@
+//created on: Jun 12, 2018
+package rules
+
+import com.sample.model.*;
+import java.util.ArrayList;
+
+function Integer contained( ArrayList a, ArrayList b ){
+    ArrayList x = new ArrayList( a );
+    x.retainAll( b );
+    return x.size();
+}
+
+rule "povezane bolesti"
+agenda-group "povezane"
+    when
+    	$pb: PovezaneBolestiList($pbl: povezane)
+        $s: Symptoms($sy: simptomi)
+        $b: Bolesti($bs: bols)
+        $bb: Bolest($sb: simptomi) from $bs
+        eval( contained( $sy, $sb ) > 0 )
+    then
+        $pbl.add(new Povezane(contained( $sy, $sb ), $bb.getNaziv()));
+        //System.out.println(contained( $sy, $sb )+ $bb.getNaziv());
+end
+

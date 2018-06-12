@@ -23,6 +23,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.Vector;
+import java.util.Collections;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -33,17 +34,17 @@ import org.kie.api.runtime.KieContainer;
 import org.kie.api.runtime.KieSession;
 
 import com.sample.model.Bolest;
-import com.sample.model.Symptom;
+import com.sample.model.FinalResult;
+import com.sample.model.Result;
+import com.sample.model.Results;
+import com.sample.model.Symptoms;
 import com.sample.app.KnowledgeSessionHelper;
 
-import javax.swing.ListSelectionModel;
 import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListModel;
 import javax.swing.JScrollPane;
-import javax.swing.ListModel;
-import java.awt.List;
 
 public class DoctorPanel extends JFrame {
 	/**
@@ -171,9 +172,7 @@ public class DoctorPanel extends JFrame {
 		
 		JList<String> chosenSimptomi = new JList<String>(model);
 		scrollPane_1.setViewportView(chosenSimptomi);
-		dijagnoze.setLayout(gl_dijagnoze);
-		
-		
+		dijagnoze.setLayout(gl_dijagnoze);		
 		
 		addSimptom.addActionListener(new ActionListener() {
 		    public void actionPerformed(ActionEvent e) {
@@ -256,21 +255,27 @@ public class DoctorPanel extends JFrame {
 		    	}
 
 		    	String s = "";
-		    						
+		    	ArrayList<String> simp = new ArrayList<String>();					
 		    	for(int i = 0; i< chosenSimptomi.getModel().getSize();i++){
 		            s += chosenSimptomi.getModel().getElementAt(i);
 		            if(i < chosenSimptomi.getModel().getSize()-1) {
 		            	s += ",";
 		            }
-		            Symptom sy = new Symptom(chosenSimptomi.getModel().getElementAt(i));
-		            kSession.insert(sy);
+		            simp.add(chosenSimptomi.getModel().getElementAt(i));
 		        }
-		    	
-		    	
-				int fired = kSession.fireAllRules();
-			    System.out.println(fired);
-			    kSession.dispose();
-			    
+		    	Symptoms smp = new Symptoms(simp);
+		    	Results r = new Results(new ArrayList<Result>());
+		    	FinalResult f = new FinalResult("");
+		    	kSession.insert(f);
+		    	kSession.insert(r);
+		    	kSession.insert(smp);		    	
+		    	kSession.getAgenda().getAgendaGroup( "simptomi" ).setFocus();
+		    	kSession.fireAllRules();
+		    	kSession.getAgenda().getAgendaGroup( "maxSimp" ).setFocus();
+		    	kSession.fireAllRules();
+
+			    JOptionPane.showMessageDialog(getContentPane(), "Najverovatnija bolest je: " + f.getFinalRes());
+			    kSession.dispose();			    
 		    	SwingUtilities.getWindowAncestor(dijagnozaBtn).dispose();
 		    	Dijagnoza d = new Dijagnoza(pacijentBox.getSelectedItem().toString(), logged, s);
 	    		d.setSize(500, 350);
@@ -379,7 +384,12 @@ public class DoctorPanel extends JFrame {
 				hs.addAll(a);
 			}
 			as.addAll(hs);
-
+			for (int i = as.size()-1; i > 0; i--) {
+				if(as.get(i).startsWith("*")) {
+					as.remove(i);
+				}
+			}
+			as.add("*Oporavlja se od operacije");
 			allSimptomi.setListData(as);
 			
 			JPanel pacijenti = new JPanel();
@@ -490,6 +500,27 @@ public class DoctorPanel extends JFrame {
 		logout3.addActionListener(l);
 		logout4.addActionListener(l); 
 		
+		povezaneBtn.addActionListener(new ActionListener() {
+		    public void actionPerformed(ActionEvent e) {
+		    	if(chosenSimptomi.getModel().getSize() > 0) {
+		    		String s = "";
+			    	for (int i = 0; i < chosenSimptomi.getModel().getSize(); i++) {
+			    		s += chosenSimptomi.getModel().getElementAt(i);
+			    		if(i < chosenSimptomi.getModel().getSize()-1) {
+			    			s += ",";
+			    		}
+			    	}
+			    	PovezaneBolesti p = new PovezaneBolesti(s);
+		    		p.setSize(450, 350);
+		    		p.setLocationRelativeTo(null);
+		    		p.setVisible(true);
+		    	}
+		    	else
+		    		JOptionPane.showMessageDialog(getContentPane(), "Morate izabrati bar jedan simptom!");
+		    	
+		    }
+		});
+		
 	}
 	
 	public static String toString(ArrayList<String> lista) {
@@ -537,4 +568,35 @@ public class DoctorPanel extends JFrame {
 	    return new DefaultTableModel(data, columnNames);
 
 	}
+	
+	/*public static Result removeAndMax(ArrayList<Result> list) {
+		
+		ArrayList<Result> allList = new ArrayList<Result>();
+		boolean hasAllFlag = false;
+		for(int i=0; i < list.size(); i++){	    	
+	    	if(list.get(i).isSviZadovoljeni() == true) {
+	    		hasAllFlag = true;
+	    		allList.add(list.get(i));
+	    	}
+	    }
+		
+	    int max = Integer.MIN_VALUE;
+	    Result maxR = new Result(0,"",false);
+	    if(hasAllFlag == false) {
+		    for(int i=0; i < list.size(); i++){	    	
+		    	if(list.get(i).getNoSymptoms() > max){
+		    		maxR = list.get(i);
+			    }
+		    }
+	    }
+	    else
+	    {
+	    	for(int i=0; i < allList.size(); i++){	    	
+		    	if(allList.get(i).getNoSymptoms() > max){
+		    		maxR = allList.get(i);
+			    }
+		    }
+	    }
+	    return maxR;
+	}*/
 }

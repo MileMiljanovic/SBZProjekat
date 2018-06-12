@@ -1,0 +1,70 @@
+package rules
+
+import com.sample.model.*;
+import java.util.ArrayList;
+
+
+function Integer inside( ArrayList a, ArrayList b ){
+    ArrayList x = new ArrayList( a );
+    x.retainAll( b );
+    return x.size();
+}
+
+
+rule "bar 4 simptoma, prva i druga grupa"
+agenda-group "simptomi"
+salience 10
+    when
+    	$r: Results($res: results)
+        $slist: Symptoms($s: simptomi)
+        $b: Bolest(grupa == "prva" || grupa == "druga", $blist: simptomi)
+        eval( inside( $s, $blist ) >= 4 )
+    then
+    	$res.add(new Result(inside( $s, $blist ), $b.getNaziv(), false));
+
+end
+
+
+rule "svi simptomi"
+agenda-group "simptomi"
+salience 9
+    when
+    	$r: Results($res: results)
+    	$slist: Symptoms($s: simptomi)
+        $b: Bolest(grupa == "prva" || grupa == "druga", $blist: simptomi)
+        eval( inside( $s, $blist ) == $blist.size() )
+    then
+    	$res.add(new Result($blist.size(), $b.getNaziv(), true));
+
+end
+
+rule "maxSimp kad nisu svi zadovoljeni"
+agenda-group "maxSimp"
+salience 2
+    when
+    	$f: FinalResult()
+    	$r: Results($res: results)
+    	accumulate (Result($br: noSymptoms, sviZadovoljeni == false) from $res,
+    		$maximum: max($br)
+    	)
+    	$konacno: Result(noSymptoms == $maximum, sviZadovoljeni == false) from $res
+    then
+    	modify ($f) { setFinalRes($konacno.getResult()) }
+       
+end
+
+rule "maxSimp kad su svi  zadovoljeni"
+agenda-group "maxSimp"
+salience 1
+    when
+    	$f: FinalResult()
+    	$r: Results($res: results)
+    	accumulate (Result($br: noSymptoms, sviZadovoljeni == true) from $res,
+    		$maximum: max($br)
+    	)
+    	$konacno: Result(noSymptoms == $maximum, sviZadovoljeni == true) from $res
+    then
+    	modify ($f) { setFinalRes($konacno.getResult()) }
+end
+
+
